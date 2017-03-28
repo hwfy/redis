@@ -35,6 +35,8 @@ func TestSelect(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	defer client.Close()
+
 	err = client.Select("menu")
 	if err != nil {
 		t.Error(err)
@@ -44,10 +46,12 @@ func TestSelect(t *testing.T) {
 func TestHash(t *testing.T) {
 	name := "test"
 
-	client, err := NewClient("menu", "../../../config/redis.config")
+	client, err := NewClient("menu", "../config/redis.config")
 	if err != nil {
 		t.Error(err)
 	}
+	defer client.Close()
+
 	if !client.Exist(name) {
 
 		for index, people := range GetPeople() {
@@ -98,10 +102,12 @@ func TestHash(t *testing.T) {
 func TestSet(t *testing.T) {
 	name := "test"
 
-	client, err := NewClient("menu", "../../../config/redis.config")
+	client, err := NewClient("menu", "../config/redis.config")
 	if err != nil {
 		t.Error(err)
 	}
+	defer client.Close()
+
 	if !client.Exist(name) {
 
 		for _, people := range GetPeople() {
@@ -136,10 +142,12 @@ func TestString(t *testing.T) {
 	name := "test"
 	people := GetPeople()
 
-	client, err := NewClient("menu", "../../../config/redis.config")
+	client, err := NewClient("menu", "../config/redis.config")
 	if err != nil {
 		t.Error(err)
 	}
+	defer client.Close()
+
 	if !client.Exist(name) {
 
 		err = client.Set(name, people[0])
