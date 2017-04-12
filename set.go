@@ -15,7 +15,6 @@
 package redis
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/garyburd/redigo/redis"
@@ -51,18 +50,7 @@ func (c *client) SValues(key string) ([]byte, error) {
 	if len(values) == 0 {
 		return nil, fmt.Errorf("%s does not exist in the set database", key)
 	}
-	//If the value of the slice is json is deserialized
-	var object interface{}
-	result := make([]interface{}, len(values))
-
-	for i, v := range values {
-		err = json.Unmarshal(v, &object)
-		if err != nil {
-			object = string(v)
-		}
-		result[i] = object
-	}
-	return json.Marshal(result)
+	return unmarshal(values)
 }
 
 // SDel removes the specified element in the collection

@@ -15,7 +15,6 @@
 package redis
 
 import (
-	"encoding/json"
 	"errors"
 
 	"github.com/garyburd/redigo/redis"
@@ -33,18 +32,7 @@ func (c *client) HGetAll(key string) ([]byte, error) {
 	if len(maps) == 0 {
 		return nil, errors.New(key + hashNil)
 	}
-	//If the value of the map is json is deserialized
-	var object interface{}
-	result := make(map[string]interface{}, len(maps))
-
-	for k, v := range maps {
-		err = json.Unmarshal([]byte(v), &object)
-		if err != nil {
-			object = v
-		}
-		result[k] = object
-	}
-	return json.Marshal(result)
+	return unmarshal(maps)
 }
 
 // HValues gets the value of all fields in the hash table
@@ -57,18 +45,7 @@ func (c *client) HValues(key string) ([]byte, error) {
 	if len(values) == 0 {
 		return nil, errors.New(key + hashNil)
 	}
-	//If the value of the slice is json is deserialized
-	var object interface{}
-	result := make([]interface{}, len(values))
-
-	for i, v := range values {
-		err = json.Unmarshal(v, &object)
-		if err != nil {
-			object = string(v)
-		}
-		result[i] = object
-	}
-	return json.Marshal(result)
+	return unmarshal(values)
 }
 
 // HKeys gets all the fields in the hash table

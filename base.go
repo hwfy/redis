@@ -49,7 +49,7 @@ func (c *client) do(commandName string, args ...interface{}) (reply interface{},
 	return rc.Do(commandName, args...)
 }
 
-//marshal serialized into json
+// marshal serialized into json
 func marshal(value interface{}) interface{} {
 	actual := reflect.ValueOf(value)
 	switch actual.Kind() {
@@ -59,6 +59,36 @@ func marshal(value interface{}) interface{} {
 		}
 	}
 	return value
+}
+
+// unmarshal if the value of the map is json is deserialized
+func unmarshal(value interface{}) ([]byte, error) {
+	switch actual := value.(type) {
+	case map[string]string:
+		result := make(map[string]interface{}, len(actual))
+		for k, v := range actual {
+			var object interface{}
+
+			if err := json.Unmarshal([]byte(v), &object); err != nil {
+				object = v
+			}
+			result[k] = object
+		}
+		return json.Marshal(result)
+
+	case [][]byte:
+		result := make([]interface{}, len(actual))
+		for i, v := range actual {
+			var object interface{}
+
+			if err := json.Unmarshal(v, &object); err != nil {
+				object = string(v)
+			}
+			result[i] = object
+		}
+		return json.Marshal(result)
+	}
+	return json.Marshal(value)
 }
 
 // SetExpire set the expiration time of key, time is seconds
@@ -109,9 +139,7 @@ func NewClient(name string, path ...string) (*client, error) {
 		return nil, errors.New("read configuration file failed, " + err.Error())
 	}
 	redis := new(client)
-
-	err = json.Unmarshal(bytes, redis)
-	if err != nil {
+	if err = json.Unmarshal(bytes, redis); err != nil {
 		return nil, err
 	}
 	db, has := redis.DataSources[name]
